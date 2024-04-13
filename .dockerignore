@@ -1,0 +1,10 @@
+venv
+.git
+.gitignore
+.env
+.env.example
+.ruff.toml
+.ruff_cache
+.dockerignore
+.vscode
+README.md
