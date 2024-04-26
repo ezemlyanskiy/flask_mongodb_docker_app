@@ -11,7 +11,7 @@ A simple application built with Flask, MongoDB, and Docker.
 
 ```bash
 cat .env.example > .env
-docker compose up -d
+sudo docker compose up -d
 ```
 
 ## API Endpoints
