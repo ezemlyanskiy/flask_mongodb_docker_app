@@ -2,9 +2,12 @@ import json
 import os
 from http import HTTPStatus
 
-from bson import ObjectId, json_util
+from bson import json_util
 from flask import Flask, request
 from flask_pymongo import PyMongo
+
+from utils import convert_item_id
+from exceptions import ItemNotFoundError
 
 MONGODB_URI = os.environ.get('MONGODB_ENDPOINT')
 
@@ -32,26 +35,38 @@ def create_item():
 
 @app.route('/items/<item_id>', methods=['GET'])
 def get_item(item_id):
-    item = mongo.db.items.find_one_or_404({'_id': ObjectId(item_id)})
-    return parse_json(item), HTTPStatus.OK
+    try:
+        item = mongo.db.items.find_one_or_404(
+            {'_id': convert_item_id(item_id)}
+        )
+        return parse_json(item), HTTPStatus.OK
+    except ItemNotFoundError:
+        return parse_json({'error': 'Item not found'}), HTTPStatus.NOT_FOUND
 
 
 @app.route('/items/<item_id>', methods=['PUT'])
 def update_item(item_id):
-    item = request.get_json()
-    item_id_obj = ObjectId(item_id)
-    result = mongo.db.items.update_one({'_id': item_id_obj}, {'$set': item})
+    try:
+        item = request.get_json()
+        item_id_obj = convert_item_id(item_id)
+        result = mongo.db.items.update_one(
+            {'_id': item_id_obj}, {'$set': item}
+        )
 
-    if result.matched_count == 0:
+        if result.matched_count == 0:
+            return parse_json(
+                {'error': 'Item not found'}
+            ), HTTPStatus.NOT_FOUND
+
+        updated_item = mongo.db.items.find_one({'_id': item_id_obj})
+        return (
+            parse_json(
+                {'message': 'Item updated successfully', 'item': updated_item},
+            ),
+            HTTPStatus.OK,
+        )
+    except ItemNotFoundError:
         return parse_json({'error': 'Item not found'}), HTTPStatus.NOT_FOUND
-
-    updated_item = mongo.db.items.find_one({'_id': item_id_obj})
-    return (
-        parse_json(
-            {'message': 'Item updated successfully', 'item': updated_item},
-        ),
-        HTTPStatus.OK,
-    )
 
 
 if __name__ == '__main__':

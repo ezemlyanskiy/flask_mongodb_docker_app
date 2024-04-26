@@ -8,3 +8,5 @@ venv
 .dockerignore
 .vscode
 README.md
+tests
+pytest.ini

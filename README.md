@@ -10,6 +10,7 @@ A simple application built with Flask, MongoDB, and Docker.
 4. Run the following command to start the application:
 
 ```bash
+cat .env.example > .env
 docker compose up -d
 ```
 
@@ -24,3 +25,9 @@ docker compose up -d
 
 This project serves as a demonstration of a basic application using Flask, MongoDB, and Docker.  
 Feel free to explore the code and have fun experimenting!
+
+## Testing
+
+```bash
+pytest
+```
